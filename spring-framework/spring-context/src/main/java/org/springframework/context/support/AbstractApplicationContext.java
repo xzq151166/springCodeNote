@@ -538,12 +538,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				/**初始化事件多播器，为了后续的监听功能提供载体，
+				 * 与下面的registerListeners（）方法密切相关**/
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
 				// Check for listener beans and register them.
+				/**监听多播器，与initApplicationEventMulticaster()方法密切相关，这里使用了观察者模式**/
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
@@ -762,7 +765,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
-		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
+		/**以下代码逻辑
+		 * 如果代码有自定义的applicationEventMulticaster，那么就使用自定义applicationEventMulticaster
+		 * 如果没有自定义applicationEventMulticaster，那么就是用系统默认的SimpleApplicationEventMulticaster
+		 * 根据这段逻辑，我们可以自定义一个继承SimpleApplicationEventMulticaster的bean，实现异步多播器**/
+		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME/*"applicationEventMulticaster"*/)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
 			if (logger.isTraceEnabled()) {
@@ -770,6 +777,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 		}
 		else {
+			/**代码没有自定义多播器，所以使用系统默认的多播器，SimpleApplicationEventMulticaster**/
 			this.applicationEventMulticaster = new SimpleApplicationEventMulticaster(beanFactory);
 			beanFactory.registerSingleton(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, this.applicationEventMulticaster);
 			if (logger.isTraceEnabled()) {

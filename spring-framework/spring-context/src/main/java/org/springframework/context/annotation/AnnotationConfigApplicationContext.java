@@ -63,7 +63,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		/**注册注解模式下的注解读取器**/
 		this.reader = new AnnotatedBeanDefinitionReader(this);
+		/**注册类路径下的**/
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
 
@@ -84,8 +86,17 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		/**this()方法完成了以下步骤：
+		 * 1、调用父类GenericApplicationContext无参构造，初始化DefultListableBeanfactory
+		 * 2、初始化注解模式下DefultListableBeanFactory的bean定义读取器
+		 * 3、classPath类型的bean定义扫描器
+		 * **/
 		this();
+
+		/**如@Bean @Configration等等标记的类，注册配置类到容器中去**/
 		register(componentClasses);
+
+		/**容器刷新方法，核心重点方法，beanFactory所没有的功能会在这个里面体现**/
 		refresh();
 	}
 
